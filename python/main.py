@@ -31,7 +31,6 @@ fig_312_pad = np.pad(fig_312, 1, 'constant', constant_values=0)
 fig_333_pad = np.pad(fig_333, 1, 'constant', constant_values=0)
 
 blurred_fig_333 = _smooth.box_filter(fig_333_pad.astype(dtype='int64'), 0)
-print(masks.STD_3X3)
 cv2.imshow('before', fig_333)
 cv2.imshow('after', blurred_fig_333)
 cv2.waitKey(0)
