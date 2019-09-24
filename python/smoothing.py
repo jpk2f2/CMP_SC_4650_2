@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import math
 
 
 # preprocesses given image, returns padded version and array w/ original dimensions for final image
@@ -86,4 +87,28 @@ def avg_filter(im: np.ndarray, mask) -> np.ndarray:
     return im2  # return processed image
 
 
+def create_gauss_conv(kernel: int) -> np.ndarray:
+    final = np.zeros(shape=(2*kernel+1, 2*kernel+1))
+    test = 0
+    for i in range(-kernel, kernel+1):
+        for j in range(-kernel, kernel+1):
+            tmp = -1*((i**2 + j**2)/(2*(kernel**2)))
+            final[i+kernel, j+kernel] = math.exp(tmp)  # /(2*np.pi*kernel*kernel)
+            test = test + final[i+kernel, j+kernel]
+            # print("{},{} val: {}.".format(i, j, final[i+kernel, j+kernel]))
+
+    # print("test: {}".format(test))
+    final = final/test
+
+    return final
+
+
+def create_gauss_conv_2(kernel):
+    xx, yy = np.meshgrid(7, 7)
+    tmp = np.zeros(shape=(7, 7))
+    print(np.square(xx))
+    tmp = np.exp(-1/(2*3**2) * (np.square(xx) + np.square(yy)))
+
+    # print("test: {}".format(tmp))
+    return tmp
 # def guass_filter(im: ndarray, padded: bool, m)

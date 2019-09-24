@@ -35,3 +35,5 @@ cv2.imshow('before', fig_333)
 cv2.imshow('after', blurred_fig_333)
 cv2.imshow('after2', blurred_fig_3332)
 cv2.waitKey(0)
+
+print(_smooth.create_gauss_conv(3))
