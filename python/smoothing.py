@@ -56,8 +56,11 @@ def box_filter(im: np.ndarray) -> np.ndarray:
 # takes image to be processed, true/false if image has been zero padded, and the designated mask in a 3x3 ndarray
 # returns processed image
 # a 3x3 array of all ones is equivalent to the box filter
-def avg_filter(im: np.ndarray, mask: tuple) -> np.ndarray:
-    array, padding = mask
+def avg_filter(im: np.ndarray, mask) -> np.ndarray:
+    array = mask[0]
+    # padding = 1
+    padding = mask[1]
+    # array, padding = mask
     im, im2 = prepare_image(im, padding)  # preprocess image
     # get proper divisor by adding up weighted array values
     divisor = 0
@@ -69,10 +72,8 @@ def avg_filter(im: np.ndarray, mask: tuple) -> np.ndarray:
     dimensions = im.shape
     height, width = dimensions
     # loops through image pixels, excluding zero edges
-    for i in range(0+padding, height - 1 + padding):
-        for j in range(0 + padding, width - 1 + padding):
-            for k in range(0, padding):
-                print(k)
+    for i in range(0+padding, height - (1 + padding)):
+        for j in range(0 + padding, width - (1 + padding)):
             # add up each row w/ each entry multiplied by its designated weight
             top = im[i - 1, j - 1] * array[0, 0] + im[i - 1, j] * array[1, 0] + im[i + 1, j + 1] * array[2, 0]
             mid = im[i, j - 1] * array[0, 1] + im[i, j] * array[1, 1] + im[i, j + 1] * array[2, 1]
