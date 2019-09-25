@@ -31,6 +31,19 @@ def pp_image(im: np.ndarray, g2rgb: bool) -> np.ndarray:
     return im.astype(dtype='uint8')
 
 
+# unused function
+# designed to get neighbor pixels for given location and kernel size
+# untested, may not work correctly
+def get_pixel_neigbhors(im: np.ndarray, x: int, y: int, kernel: int) -> np.ndarray:
+    array = np.zeros((2 * kernel + 1, 2 * kernel + 1))
+    total = 0
+    for i in range(0, 2 * kernel + 1):
+        for j in range(0, 2 * kernel + 1):
+            array[i, j] = im[x - kernel + i, y - kernel + j]
+
+    return array
+
+
 # 3x3 filter
 # takes an image, true/false padding
 def box_filter(im: np.ndarray) -> np.ndarray:
@@ -135,19 +148,6 @@ def guass_filter(im: np.ndarray, kernel: int) -> np.ndarray:
     return im2  # return processed image
 
 
-# unused function
-# designed to get neighbor pixels for given location and kernel size
-# untested, may not work correctly
-def get_pixel_neigbhors(im: np.ndarray, x: int, y: int, kernel: int) -> np.ndarray:
-    array = np.zeros((2 * kernel + 1, 2 * kernel + 1))
-    total = 0
-    for i in range(0, 2 * kernel + 1):
-        for j in range(0, 2 * kernel + 1):
-            array[i, j] = im[x - kernel + i, y - kernel + j]
-
-    return array
-
-
 def guass_filter_3(im: np.ndarray, kernel: int) -> np.ndarray:
     _filter = _mask.GAUS_7X7
     # _filter = create_gauss_conv(kernel)
@@ -191,6 +191,31 @@ def guass_filter_3(im: np.ndarray, kernel: int) -> np.ndarray:
             total = line1 + line2 + line3 + line4 + line5 + line6 + line7  # add up rows
             # avg = total / divisor  # average total using calculated divisor
             im2[i, j] = round(total)  # round result
+    # postprocess image to fix type
+    im2 = pp_image(im2, False)
+    return im2  # return processed image
+
+
+def med_filter(im: np.ndarray, kernel: int) -> np.ndarray:
+    padding = kernel
+    im, im2 = prepare_image(im, padding)  # preprocess image
+
+    # get image dimensions
+    dimensions = im.shape
+    height, width = dimensions
+    # loops through image pixels, excluding zero edges
+    window = []
+    for i in range(0 + padding, height - (2*padding)):
+        for j in range(0 + padding, width - (2*padding)):
+            for k in range(-kernel, kernel + 1):
+                for l in range(-kernel, kernel + 1):
+                    window.append(im[i + k, j + l])
+            # print("1: {}".format(window))
+            window.sort()
+            # print("2: {}".format(window))
+            im2[i, j] = window[math.floor(((kernel*2+1)**2)/2)]
+            # im2[i, j] = window[4]
+            window.clear()
     # postprocess image to fix type
     im2 = pp_image(im2, False)
     return im2  # return processed image
