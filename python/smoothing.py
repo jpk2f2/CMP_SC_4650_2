@@ -128,7 +128,7 @@ def create_gauss_conv(kernel: int) -> np.ndarray:
 # kernel size equates to a 2*kernel+1 by 2*kernel+1 sliding window ie kernel 1 = 3x3 window
 # handles kernel size 1 only
 # returns processed image
-def guass_filter(im: np.ndarray, kernel: int) -> np.ndarray:
+def guass_filter_1(im: np.ndarray, kernel: int) -> np.ndarray:
     # hardcode kernel size just in case
     kernel = 1
     # use premade gaussian filter for kernel 1
@@ -141,8 +141,8 @@ def guass_filter(im: np.ndarray, kernel: int) -> np.ndarray:
     dimensions = im.shape
     height, width = dimensions
     # loops through image pixels, excluding zero edges
-    for i in range(0 + padding, height - (2*padding)):
-        for j in range(0 + padding, width - (2*padding)):
+    for i in range(0 + padding, height - (2 * padding)):
+        for j in range(0 + padding, width - (2 * padding)):
             # hardcoded calcs and dimensions
             top = im[i - 1, j - 1] * _filter[0, 0] + im[i - 1, j] * _filter[1, 0] + im[i - 1, j + 1] * _filter[2, 0]
             mid = im[i, j - 1] * _filter[0, 1] + im[i, j] * _filter[1, 1] + im[i, j + 1] * _filter[2, 1]
@@ -173,13 +173,13 @@ def guass_filter_3(im: np.ndarray, kernel: int) -> np.ndarray:
     dimensions = im.shape
     height, width = dimensions
     # loops through image pixels, excluding zero edges
-    for i in range(0 + padding, height - (2*padding)):
-        for j in range(0 + padding, width - (2*padding)):
+    for i in range(0 + padding, height - (2 * padding)):
+        for j in range(0 + padding, width - (2 * padding)):
             # harcoded calculations and dimensions
             line1 = im[i - 3, j - 3] * _filter[0, 0] + im[i - 3, j - 2] * _filter[1, 0] + \
-                  im[i - 3, j - 1] * _filter[2, 0] + im[i - 3, j] * _filter[3, 0] + \
-                  im[i - 3, j + 1] * _filter[4, 0] + im[i - 3, j + 2] * _filter[5, 0] + \
-                  im[i - 3, j + 3] * _filter[6, 0]
+                    im[i - 3, j - 1] * _filter[2, 0] + im[i - 3, j] * _filter[3, 0] + \
+                    im[i - 3, j + 1] * _filter[4, 0] + im[i - 3, j + 2] * _filter[5, 0] + \
+                    im[i - 3, j + 3] * _filter[6, 0]
             line2 = im[i - 2, j - 3] * _filter[0, 1] + im[i - 2, j - 2] * _filter[1, 1] + \
                     im[i - 2, j - 1] * _filter[2, 1] + im[i - 2, j] * _filter[3, 1] + \
                     im[i - 2, j + 1] * _filter[4, 1] + im[i - 2, j + 2] * _filter[5, 1] + \
@@ -224,15 +224,15 @@ def med_filter(im: np.ndarray, kernel: int) -> np.ndarray:
     height, width = dimensions
     # loops through image pixels, excluding zero edges
     window = []  # intialize list var
-    for i in range(0 + padding, height - (2*padding)):
-        for j in range(0 + padding, width - (2*padding)):
+    for i in range(0 + padding, height - (2 * padding)):
+        for j in range(0 + padding, width - (2 * padding)):
             # loop through sliding window size to handle various kernel sizes
             for k in range(-kernel, kernel + 1):
                 for l in range(-kernel, kernel + 1):
                     window.append(im[i + k, j + l])  # add current pixel to list
             window.sort()  # sort list for median selection
             # calculate median location and it in dest pixel
-            im2[i, j] = window[math.floor(((kernel*2+1)**2)/2)]
+            im2[i, j] = window[math.floor(((kernel * 2 + 1) ** 2) / 2)]
             window.clear()  # clear list for next calc
     # postprocess image to fix type
     im2 = pp_image(im2, False)
