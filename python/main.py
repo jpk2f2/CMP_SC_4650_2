@@ -31,9 +31,13 @@ height, width = im_prop
 
 blurred_fig_333 = _smooth.box_filter(fig_333)
 blurred_fig_3332 = _smooth.avg_filter(fig_333, masks.WTD1_3X3)
+blurred_fig_3333 = _smooth.guass_filter(fig_333, 1)
+blurred_fig_3334 = _smooth.guass_filter_3(fig_333, 3)
 cv2.imshow('before', fig_333)
-cv2.imshow('after', blurred_fig_333)
-cv2.imshow('after2', blurred_fig_3332)
+cv2.imshow('after box', blurred_fig_333)
+cv2.imshow('after weighted avg', blurred_fig_3332)
+cv2.imshow('after gauss', blurred_fig_3333)
+cv2.imshow('after gauss_3', blurred_fig_3334)
 cv2.waitKey(0)
 
-print(_smooth.create_gauss_conv(3))
+#  print(_smooth.create_gauss_conv(3))
