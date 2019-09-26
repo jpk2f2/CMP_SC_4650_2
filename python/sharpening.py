@@ -20,27 +20,27 @@ def lpl_sharpen(im: np.ndarray, mask) -> (np.ndarray, np.ndarray):
     # code below is my logic for convulation
     # it is commented out so that the more efficient scipy convolve2d function can be used
     # code below being saved for future improvement and/or comparison with convolve2d
-
+    """
     # get image dimensions
-    #    dimensions = im.shape
-    #    height, width = dimensions
+    dimensions = im.shape
+    height, width = dimensions
 
     # loops through image pixels, excluding zero edges
-    #    for i in range(0 + padding, height - (1 + padding)):
-    #        for j in range(0 + padding, width - (1 + padding)):
-    #            # add up each row w/ each entry multiplied by its designated weight
-    #            # hardcoded
-    #            top = im[i - 1, j - 1] * array[0, 0] + im[i - 1, j] * array[1, 0] + im[i - 1, j + 1] * array[2, 0]
-    #            mid = im[i, j - 1] * array[0, 1] + im[i, j] * array[1, 1] + im[i, j + 1] * array[2, 1]
-    #            bot = im[i + 1, j - 1] * array[0, 2] + im[i + 1, j] * array[1, 2] + im[i + 1, j + 1] * array[2, 2]
-    #            total = top + mid + bot  # add up rows
-    # int("total: {}".format(total))
-    #            im3[i, j] = total
+    for i in range(0 + padding, height - (1 + padding)):
+        for j in range(0 + padding, width - (1 + padding)):
+            # add up each row w/ each entry multiplied by its designated weight
+            # hardcoded
+            top = im[i - 1, j - 1] * array[0, 0] + im[i - 1, j] * array[1, 0] + im[i - 1, j + 1] * array[2, 0]
+            mid = im[i, j - 1] * array[0, 1] + im[i, j] * array[1, 1] + im[i, j + 1] * array[2, 1]
+            bot = im[i + 1, j - 1] * array[0, 2] + im[i + 1, j] * array[1, 2] + im[i + 1, j + 1] * array[2, 2]
+            total = top + mid + bot  # add up rows
+            im3[i, j] = total
 
+    """
     # convolve image with filter
     # specify 'valid' to use prepared padding and prevent double padding
     im_lpl = scipy.signal.convolve2d(im, array, 'valid')
-    im_lpl = im_lpl.astype('float64') # fix type for upcoming manipulation
+    im_lpl = im_lpl.astype('float64')  # fix type for upcoming manipulation
 
     # display original laplacian sharpen outcome
     # cv2.imshow('test: ', im_lpl.astype('uint8'))

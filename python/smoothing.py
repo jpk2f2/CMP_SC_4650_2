@@ -3,91 +3,89 @@ import numpy as np
 import math
 import scipy.signal
 import masks
-from utility import prepare_image, pp_image
+from utility import prepare_image, pp_image, create_gauss_conv
 
 
-# 3x3 box filter
-# takes an image
+# average smoothing algorithm
+# takes in an image, an optional tuple containing a mask and it's appropriate kernel, and an optional tuple with a
+# bool stating whether a box filter should be used alongside the kernel size if True
+# if no mask is specified and box filter isn't specified it defaults to a 3x3 box filter
+# available mask/kernel tuples can be found in masks.py, or custom can be used following in their pattern
 # returns processed image
-def box_filter(im: np.ndarray) -> np.ndarray:
-    im_pad, final = prepare_image(im, 1, 'zero')  # prepare image
-    # get dimensions of image
-    dimensions = im_pad.shape
-    height, width = dimensions
-    # loop through pixels(excluding zero pads)
-    for i in range(0, height - 2):
-        for j in range(0, width - 2):
-            # add up all pixels in 3x3 area centered on current pixel
-            # hardcoded
-            top = im_pad[i - 1, j - 1] + im_pad[i - 1, j] + im_pad[i + 1, j + 1]
-            mid = im_pad[i, j - 1] + im_pad[i, j] + im_pad[i, j + 1]
-            bot = im_pad[i + 1, j - 1] + im_pad[i + 1, j] + im_pad[i + 1, j + 1]
-            total = top + mid + bot
-            # average total
-            avg = total / 9
-            # place rounded average back into the current pixel
-            final[i, j] = round(avg)
-    # postprocess image to correct type
-    final = pp_image(final, False)
-    return final  # return the processed image
+def avg_filter(im: np.ndarray, mask: tuple = (masks.STD_3X3, 1), box: tuple = (False, 0)) -> np.ndarray:
+    # check if box filter requested
+    if box[0]:
+        # create box filter in designated kernel size
+        _filter = np.ones((box[1], box[1]), dtype='int')
+        kernel = box[1]
+    else:
+        # use given filter and kernel
+        _filter, kernel = mask
 
-
-# 3x3 filter
-# takes image to be processed, true/false if image has been zero padded, and the designated mask in a 3x3 ndarray
-# returns processed image
-# a 3x3 array of all ones is equivalent to the box filter
-def avg_filter(im: np.ndarray, mask) -> np.ndarray:
-    array = mask[0]
-    # padding = 1
-    padding = mask[1]
-    # array, padding = mask
-    im, im2 = prepare_image(im, padding, 'zero')  # preprocess image
-    # get proper divisor by adding up weighted array values
-    divisor = 0
-    for i in array:
+    im, im_proc = prepare_image(im, kernel, 'zero')  # preprocess image
+    # loop through filter to get divisor
+    div = 0  # init
+    for i in _filter:
         for j in i:
-            divisor = divisor + j
+            div = div + j
 
-    # get image dimensions
+    im_proc = scipy.signal.convolve2d(im, _filter, 'valid')
+    im_proc /= div
+
+    return pp_image(im_proc, False)
+
+
+# median filter
+# currently mostly identical to the defunct version
+# working on ways to make it more efficient, i.e not O(n^4)...yikes
+# takes in the image and kernel size
+# kernel size equates to a 2*kernel+1 by 2*kernel+1 sliding window ie kernel 1 = 3x3 window
+# handles any kernel size
+# returns processed image
+def med_filter(im: np.ndarray, kernel: int) -> np.ndarray:
+    im, im_proc = prepare_image(im, kernel, 'zero')  # preprocess image
     dimensions = im.shape
-    height, width = dimensions
-    # loops through image pixels, excluding zero edges
-    for i in range(0 + padding, height - (1 + padding)):
-        for j in range(0 + padding, width - (1 + padding)):
-            # add up each row w/ each entry multiplied by its designated weight
-            # hardcoded
-            top = im[i - 1, j - 1] * array[0, 0] + im[i - 1, j] * array[1, 0] + im[i + 1, j + 1] * array[2, 0]
-            mid = im[i, j - 1] * array[0, 1] + im[i, j] * array[1, 1] + im[i, j + 1] * array[2, 1]
-            bot = im[i + 1, j - 1] * array[0, 2] + im[i + 1, j] * array[1, 2] + im[i + 1, j + 1] * array[2, 2]
-            total = top + mid + bot  # add up rows
-            avg = total / divisor  # average total using calculated divisor
-            im2[i, j] = round(avg)  # round result
-    # postprocess image to fix type
-    im2 = pp_image(im2, False)
-    return im2  # return processed image
+    # loop through image pixels, excluding padded edges
+    # place pixels within sliding window in list
+    window = []
+    for i in range(0 + kernel, dimensions[0] - (2 * kernel)):
+        for j in range(0 + kernel, dimensions[1] - (2 * kernel)):
+            for k in range(-kernel, kernel+1):
+                for l in range(-kernel, kernel+1):
+                    window.append(im[i+k, k+l])
+            # sort pixels from sliding window and then place median value in processed image
+            window.sort()
+            im_proc[i, j] = window[math.floor(((kernel * 2 + 1) ** 2) / 2)]
+
+            window.clear()  # clear sliding window list for next iteration
+    # return processed image
+    return pp_image(im_proc, False)
 
 
-# creates a gaussian matrix using a given kernel size for convulation w/ an image
-# returns the guassian matrix
-# for example, a kernel size of 2 creates a 5x5 gaussian array
-def create_gauss_conv(kernel: int) -> np.ndarray:
-    # create array to hold guassian array
-    final = np.zeros(shape=(2 * kernel + 1, 2 * kernel + 1))
-    tot = 0
-    # loop through array, creating gaussian distribution
-    for i in range(-kernel, kernel + 1):
-        for j in range(-kernel, kernel + 1):
-            # create guassian dividend
-            tmp = -1 * ((i ** 2 + j ** 2) / (2 * (kernel ** 2)))
-            # complete gaussian function and place it in dest
-            final[i + kernel, j + kernel] = math.exp(tmp) / (2 * np.pi * kernel ** 2)
-            # count total for normalization
-            tot = tot + final[i + kernel, j + kernel]
+# generic guassian filter algorithm
+# takes in image, kernel size, and whether to use a premade filter( max premade size of 3)
+# kernel size equates to a size*2+1 by size*2+1 sliding window
+# returns process image
+def guass_filter(im: np.ndarray, kernel: int, premade: bool = False) -> np.ndarray:
+    # check if premade desired
+    if premade:
+        _filter = masks.kernel_to_filter(kernel) # use premade guassian filter
+    else:
+        _filter = create_gauss_conv(kernel)  # create a guassian filter for the given kernel
 
-    # normalize gaussian array
-    final = final / tot
+    im, im_proc = prepare_image(im, kernel, 'zero')  # preprocess image
+    # convolve image with filter
+    # 'valid' specified to use preprocessed padding
+    im_proc = scipy.signal.convolve2d(im, _filter, 'valid')
 
-    return final
+    # post process image and return it
+    return pp_image(im_proc, False)
+
+"""
+    All algorithms below this line are no longer being actively used
+    They have been kept for either testing, for the professor to view, or for posterity
+    Reccomended to use the more flexible and efficient versions above
+"""
 
 
 # guassian filter
@@ -135,14 +133,10 @@ def guass_filter_3(im: np.ndarray, kernel: int) -> np.ndarray:
     # calculate gaussian filter for specified kernel
     # _filter = create_gauss_conv(kernel)
     padding = kernel
-    ex_2 = scipy.signal.convolve2d(im, _filter)
-    ex_2 = pp_image(ex_2, False)
     im, im2 = prepare_image(im, padding, 'zero')  # preprocess image
 
     dimensions = im.shape
     height, width = dimensions
-    ex = scipy.signal.convolve2d(im, _filter, 'valid')
-    ex = pp_image(ex, False)
     # loops through image pixels, excluding zero edges
     for i in range(0 + padding, height - (2 * padding)):
         for j in range(0 + padding, width - (2 * padding)):
@@ -179,12 +173,7 @@ def guass_filter_3(im: np.ndarray, kernel: int) -> np.ndarray:
             im2[i, j] = round(total)  # round result
     # postprocess image to fix type
     im2 = pp_image(im2, False)
-    im = pp_image(im, False)
-    cv2.imshow('orig?: ', im)
-    cv2.imshow('ex: ', ex)
-    cv2.imshow('own: ', im2)
-    cv2.imshow('ex2: ', ex_2)
-    cv2.waitKey(0)
+    # im = pp_image(im, False)
     return im2  # return processed image
 
 
@@ -193,7 +182,7 @@ def guass_filter_3(im: np.ndarray, kernel: int) -> np.ndarray:
 # kernel size equates to a 2*kernel+1 by 2*kernel+1 sliding window ie kernel 1 = 3x3 window
 # handles any kernel size
 # returns processed image
-def med_filter(im: np.ndarray, kernel: int) -> np.ndarray:
+def med_filter_defunct(im: np.ndarray, kernel: int) -> np.ndarray:
     padding = kernel
     im, im2 = prepare_image(im, padding, 'zero')  # preprocess image
     # get image dimensions
@@ -214,3 +203,66 @@ def med_filter(im: np.ndarray, kernel: int) -> np.ndarray:
     # postprocess image to fix type
     im2 = pp_image(im2, False)
     return im2  # return processed image
+
+
+# 3x3 filter average filter
+# takes image to be processed, true/false if image has been zero padded, and the designated mask in a 3x3 ndarray
+# returns processed image
+# a 3x3 array of all ones is equivalent to the box filter
+
+def avg_filter_defunct(im: np.ndarray, mask) -> np.ndarray:
+    array = mask[0]
+    # padding = 1
+    padding = mask[1]
+    # array, padding = mask
+    im, im2 = prepare_image(im, padding, 'zero')  # preprocess image
+    # get proper divisor by adding up weighted array values
+    divisor = 0
+    for i in array:
+        for j in i:
+            divisor = divisor + j
+
+    # get image dimensions
+    dimensions = im.shape
+    height, width = dimensions
+    # loops through image pixels, excluding zero edges
+    for i in range(0 + padding, height - (1 + padding)):
+        for j in range(0 + padding, width - (1 + padding)):
+            # add up each row w/ each entry multiplied by its designated weight
+            # hardcoded
+            top = im[i - 1, j - 1] * array[0, 0] + im[i - 1, j] * array[1, 0] + im[i + 1, j + 1] * array[2, 0]
+            mid = im[i, j - 1] * array[0, 1] + im[i, j] * array[1, 1] + im[i, j + 1] * array[2, 1]
+            bot = im[i + 1, j - 1] * array[0, 2] + im[i + 1, j] * array[1, 2] + im[i + 1, j + 1] * array[2, 2]
+            total = top + mid + bot  # add up rows
+            avg = total / divisor  # average total using calculated divisor
+            im2[i, j] = round(avg)  # round result
+    # postprocess image to fix type
+    im2 = pp_image(im2, False)
+    return im2  # return processed image
+
+
+# 3x3 box filter
+# use average filter instead and specify box filter
+# takes an image
+# returns processed image
+def box_filter_defunct(im: np.ndarray) -> np.ndarray:
+    im_pad, final = prepare_image(im, 1, 'zero')  # prepare image
+    # get dimensions of image
+    dimensions = im_pad.shape
+    height, width = dimensions
+    # loop through pixels(excluding zero pads)
+    for i in range(0, height - 2):
+        for j in range(0, width - 2):
+            # add up all pixels in 3x3 area centered on current pixel
+            # hardcoded
+            top = im_pad[i - 1, j - 1] + im_pad[i - 1, j] + im_pad[i + 1, j + 1]
+            mid = im_pad[i, j - 1] + im_pad[i, j] + im_pad[i, j + 1]
+            bot = im_pad[i + 1, j - 1] + im_pad[i + 1, j] + im_pad[i + 1, j + 1]
+            total = top + mid + bot
+            # average total
+            avg = total / 9
+            # place rounded average back into the current pixel
+            final[i, j] = round(avg)
+    # postprocess image to correct type
+    final = pp_image(final, False)
+    return final  # return the processed image

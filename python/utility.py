@@ -37,6 +37,29 @@ def pp_image(im: np.ndarray, g2rgb: bool) -> np.ndarray:
     return im.astype(dtype='uint8')
 
 
+# creates a gaussian matrix using a given kernel size for convulation w/ an image
+# returns the guassian matrix
+# for example, a kernel size of 2 creates a 5x5 gaussian array
+def create_gauss_conv(kernel: int) -> np.ndarray:
+    # create array to hold guassian array
+    final = np.zeros(shape=(2 * kernel + 1, 2 * kernel + 1))
+    tot = 0
+    # loop through array, creating gaussian distribution
+    for i in range(-kernel, kernel + 1):
+        for j in range(-kernel, kernel + 1):
+            # create guassian dividend
+            tmp = -1 * ((i ** 2 + j ** 2) / (2 * (kernel ** 2)))
+            # complete gaussian function and place it in dest
+            final[i + kernel, j + kernel] = math.exp(tmp) / (2 * np.pi * kernel ** 2)
+            # count total for normalization
+            tot = tot + final[i + kernel, j + kernel]
+
+    # normalize gaussian array
+    final = final / tot
+
+    return final
+
+
 # unused function
 # designed to get neighbor pixels for given location and kernel size
 # untested, may not work correctly
