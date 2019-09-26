@@ -14,7 +14,7 @@ def prepare_image(im: np.ndarray, padding: int):
     im2 = np.zeros((dimensions[0], dimensions[1]))
     im = np.pad(im, padding, 'constant', constant_values=0)
     # ensure image array is large enough to prevent overflow
-    return im.astype(dtype='int64'), im2.astype(dtype='int64')  # return processed image
+    return im.astype(dtype='int64'), im2  # return processed image
 
 
 # post processes given image
