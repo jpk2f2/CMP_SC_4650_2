@@ -55,4 +55,3 @@ def lpl_sharpen_1(im: np.ndarray, mask) -> np.ndarray:
     # postprocess image to fix type
     im2 = pp_image(im2, False)
     return im2  # return processed image
-
