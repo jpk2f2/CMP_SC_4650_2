@@ -15,6 +15,8 @@ WTD2_3X3 = [1, 2, 1, 2, 4, 2, 1, 2, 1]
 WTD2_3X3 = np.array(WTD2_3X3).reshape((3, 3))
 WTD2_3X3 = (WTD2_3X3, 1)
 
+# Laplacian filters with their kernel sizes
+
 # Laplacian filter 1 and its alt
 LPL1_3X3 = [0, -1, 0, -1, 4, -1, 0, -1, 0]
 LPL1_3X3 = np.array(LPL1_3X3).reshape((3, 3))

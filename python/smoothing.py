@@ -10,7 +10,7 @@ from utility import prepare_image, pp_image
 # takes an image
 # returns processed image
 def box_filter(im: np.ndarray) -> np.ndarray:
-    im_pad, final = prepare_image(im, 1)  # prepare image
+    im_pad, final = prepare_image(im, 1, 'zero')  # prepare image
     # get dimensions of image
     dimensions = im_pad.shape
     height, width = dimensions
@@ -41,7 +41,7 @@ def avg_filter(im: np.ndarray, mask) -> np.ndarray:
     # padding = 1
     padding = mask[1]
     # array, padding = mask
-    im, im2 = prepare_image(im, padding)  # preprocess image
+    im, im2 = prepare_image(im, padding, 'zero')  # preprocess image
     # get proper divisor by adding up weighted array values
     divisor = 0
     for i in array:
@@ -103,7 +103,7 @@ def guass_filter_1(im: np.ndarray, kernel: int) -> np.ndarray:
     # create an appropriate guassian filter for given kernel size
     # _filter = create_gauss_conv(kernel)
     padding = kernel
-    im, im2 = prepare_image(im, padding)  # preprocess image
+    im, im2 = prepare_image(im, padding, 'zero')  # preprocess image
 
     dimensions = im.shape
     height, width = dimensions
@@ -135,10 +135,14 @@ def guass_filter_3(im: np.ndarray, kernel: int) -> np.ndarray:
     # calculate gaussian filter for specified kernel
     # _filter = create_gauss_conv(kernel)
     padding = kernel
-    im, im2 = prepare_image(im, padding)  # preprocess image
+    ex_2 = scipy.signal.convolve2d(im, _filter)
+    ex_2 = pp_image(ex_2, False)
+    im, im2 = prepare_image(im, padding, 'zero')  # preprocess image
 
     dimensions = im.shape
     height, width = dimensions
+    ex = scipy.signal.convolve2d(im, _filter, 'valid')
+    ex = pp_image(ex, False)
     # loops through image pixels, excluding zero edges
     for i in range(0 + padding, height - (2 * padding)):
         for j in range(0 + padding, width - (2 * padding)):
@@ -175,6 +179,12 @@ def guass_filter_3(im: np.ndarray, kernel: int) -> np.ndarray:
             im2[i, j] = round(total)  # round result
     # postprocess image to fix type
     im2 = pp_image(im2, False)
+    im = pp_image(im, False)
+    cv2.imshow('orig?: ', im)
+    cv2.imshow('ex: ', ex)
+    cv2.imshow('own: ', im2)
+    cv2.imshow('ex2: ', ex_2)
+    cv2.waitKey(0)
     return im2  # return processed image
 
 
@@ -185,7 +195,7 @@ def guass_filter_3(im: np.ndarray, kernel: int) -> np.ndarray:
 # returns processed image
 def med_filter(im: np.ndarray, kernel: int) -> np.ndarray:
     padding = kernel
-    im, im2 = prepare_image(im, padding)  # preprocess image
+    im, im2 = prepare_image(im, padding, 'zero')  # preprocess image
     # get image dimensions
     dimensions = im.shape
     height, width = dimensions
