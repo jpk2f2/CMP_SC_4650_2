@@ -1,7 +1,5 @@
-import masks
 import numpy as np
 import cv2
-import math
 import scipy.signal
 
 from utility import prepare_image, pp_image

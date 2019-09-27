@@ -1,56 +1,79 @@
-import cv2
 import numpy as np
-
-import pyramid
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plot
 import skimage.transform as transform
-from typing import List
+from typing import List  # additional typing support
 
 
+# improved gaussian pyramid display function
+# takes in a list containing the pyramid levels(images)
+# processes, formats, and displays them
+# can handle pyramids from 1 to 7 levels
 def display_guass_pyramid(samples: List[np.ndarray]):
-    len = samples.__len__()
+    len = samples.__len__()  # get number of levels
+    # input check
     if len == 0:
         return
+
+    # initial variables for formatting
     offset = 0
-    padding = 1
-    gap = 64
-    square_size = 110
-    im_og_dim = samples[0].shape
-    dpi = 100
+    padding = 1  # space between images in window
+    gap = 64  # space between pyramid and top row
+    square_size = 110  # size of squares in top row
+    im_og_dim = samples[0].shape  # get width of largest(original) image
+    dpi = 100  # dpi for display
 
     if len == 1:
+        # only have to worry about single image
         width = im_og_dim[0]
     else:
+        # ensure window is sized wide enough for display
         width = max(im_og_dim[0]+samples[1].shape[0], square_size*len)
+
+    # get height of downsampled images for setting offset off bottom of window
     height = 0
     for sample in samples:
         height += sample.shape[1]
 
     offset = 2*im_og_dim[1] - height
+
+    # set window width and height
     fig_w = width + padding*(len+1)
     fig_h = im_og_dim[1] + gap + 2*padding + square_size
 
+    # create figure
     fig = plot.figure(figsize=(fig_w/dpi, fig_h/dpi))
     # place the original, largest image
     plot.figimage(samples[0], padding, padding, cmap='gray')
 
+    # initalize x and y placement values
     xv = 0
-    yv = im_og_dim[1] + 2
+    yv = im_og_dim[1] + 2  # ensure downsampled images line up with original image
+
+    # format spacing and place pyramid images
     for i in range(1, len):
         xv = im_og_dim[0] + 2 * padding
         yv = yv - samples[i].shape[1] - 1
         plot.figimage(samples[i], xv, yv, cmap='gray')
 
+    # setup and place top row of images
+    # uses resize function from skimage to match image sizes
+    # allows easy creation of top row to fully match example image
     for i in range(0, len):
         plot.figimage(transform.resize(samples[i], (square_size, square_size), anti_aliasing=False),
                       i * square_size + (i + 1) * padding, im_og_dim[1] + gap - padding, cmap='gray')
 
-    plot.show()
+    plot.show()  # display figure
+    return
 
 
-def display_guass_pyramid_defunct(sample: List[np.ndarray]):
+# original, hardcoded gauss pyramid display logic
+# was moved from main and slightly cleaned up
+# use the current function display_gauss_pyramid() func instead
+# takes in list containing pyrmaid levels
+# processes, formats, and displays pyramid
+def display_gauss_pyramid_defunct(sample: List[np.ndarray]):
 
     offset = 8
     padding = 1
@@ -81,3 +104,4 @@ def display_guass_pyramid_defunct(sample: List[np.ndarray]):
                   cmap='gray')
 
     plot.show()
+    return

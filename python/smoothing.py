@@ -50,9 +50,9 @@ def med_filter(im: np.ndarray, kernel: int) -> np.ndarray:
     window = []
     for i in range(0 + kernel, dimensions[0] - (2 * kernel)):
         for j in range(0 + kernel, dimensions[1] - (2 * kernel)):
-            for k in range(-kernel, kernel+1):
-                for l in range(-kernel, kernel+1):
-                    window.append(im[i+k, k+l])
+            for k in range(-kernel, kernel + 1):
+                for l in range(-kernel, kernel + 1):
+                    window.append(im[i + k, k + l])
             # sort pixels from sliding window and then place median value in processed image
             window.sort()
             im_proc[i, j] = window[math.floor(((kernel * 2 + 1) ** 2) / 2)]
@@ -69,7 +69,7 @@ def med_filter(im: np.ndarray, kernel: int) -> np.ndarray:
 def guass_filter(im: np.ndarray, kernel: int, premade: bool = False) -> np.ndarray:
     # check if premade desired
     if premade:
-        _filter = masks.kernel_to_filter(kernel) # use premade guassian filter
+        _filter = masks.kernel_to_filter(kernel)  # use premade guassian filter
     else:
         _filter = create_gauss_conv(kernel)  # create a guassian filter for the given kernel
 
@@ -80,6 +80,7 @@ def guass_filter(im: np.ndarray, kernel: int, premade: bool = False) -> np.ndarr
 
     # post process image and return it
     return pp_image(im_proc, False)
+
 
 """
     All algorithms below this line are no longer being actively used

@@ -25,7 +25,7 @@ fig_335 = cv2.imread('resources/Fig0335(a)(ckt_board_saltpep_prob_pt05).tif', 0)
 fig_338 = cv2.imread('resources/Fig0338(a)(blurry_moon).tif', 0)
 fig_340 = cv2.imread('resources/Fig0340(a)(dipxe_text).tif', 0)
 # read in part 3 images
-lenna = cv2.imread(('resources/Lenna.png'), 0)
+lenna = cv2.imread('resources/Lenna.png', 0)
 
 im_prop = fig_312.shape
 # height, width, channels = im_prop
@@ -81,7 +81,6 @@ height, width = im_prop
 
 tmp = pyramid.get_gaussian_pyramid(lenna, 7)
 display.display_guass_pyramid(tmp)
-# display.display_guass_pyramid_defunct(tmp)
 
 
 #  print(smooth.create_gauss_conv(3))

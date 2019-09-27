@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 import math
-import scipy.signal
 
 
 # preprocesses given image, returns padded version and array w/ original dimensions for final image
@@ -62,7 +61,7 @@ def create_gauss_conv(kernel: int) -> np.ndarray:
 
 # unused function
 # designed to get neighbor pixels for given location and kernel size
-# untested, may not work correctly
+# untested and never used, may not work correctly
 # takes in image, x and y location for desired pixel, and kernel size
 # returns array containing window of specified kernel size centered on desired pixel
 def get_pixel_neighbors(im: np.ndarray, x: int, y: int, kernel: int) -> np.ndarray:
