@@ -1,5 +1,4 @@
 import numpy as np
-import cv2
 import scipy.signal
 
 from utility import prepare_image, pp_image

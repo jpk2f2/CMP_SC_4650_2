@@ -1,9 +1,138 @@
 import numpy as np
 import matplotlib
-matplotlib.use('TkAgg')
 import matplotlib.pyplot as plot
 import skimage.transform as transform
+from skimage import exposure
 from typing import List  # additional typing support
+
+import smoothing as smooth
+import masks
+import sharpening as sharpen
+
+
+matplotlib.use('TkAgg')  # print figures to window instead of pycharm scientific mode
+
+"""
+Display functions for all the first two parts of the assignment
+To be filled in later
+
+def display_avg_filter(im: np.ndarray, weighted: bool):
+
+def display_med_filter(im: np.ndarray):
+
+def display_gauss_filter(im: np.ndarray, premade: bool):
+
+def display_lpl_sharpen(im: np.ndarray):
+
+# this algorithm does not exist yet
+# may never be used
+def display_unsharp(im: np.ndarray):
+
+
+"""
+
+
+def display_med_filter(ims: List[np.ndarray]):
+    ctr = 1
+    for im in ims:
+        print("image {} is being processed".format(ctr))
+        f, axe = plot.subplots(1, 4, squeeze=True)
+        f.set_tight_layout(True)
+        f.suptitle('median filter', fontsize=16)
+        axe[0].imshow(im, cmap='gray')
+        axe[0].set_title('Before: ')
+        axe[0].axis('off')
+        for i in range(1, 4):
+            axe[i].imshow(smooth.med_filter(im, i), cmap='gray')
+            axe[i].set_title('After kernel {}: '.format(i))
+            axe[i].axis('off')
+            axe[i].set_aspect(aspect=1)
+
+        manager = plot.get_current_fig_manager()
+        manager.full_screen_toggle()
+        print("image {} has been processed".format(ctr))
+        ctr += 1
+    plot.show()
+    return
+
+
+def display_avg_filter(ims: List[np.ndarray], weighted: bool = False):
+    for im in ims:
+        f, axe = plot.subplots(1, 2, squeeze=True) if weighted else plot.subplots(1, 4, squeeze=True)
+        f.set_tight_layout(True)
+        f.suptitle('average filter - weighted:{}'.format(weighted), fontsize=16)
+        axe[0].imshow(im, cmap='gray')
+        axe[0].set_title('Before: ')
+        axe[0].axis('off')
+        for i in range(1, 2 if weighted else 4):
+            axe[i].imshow(smooth.avg_filter(im, i, weighted), cmap='gray')
+            axe[i].set_title('After kernel {}: '.format(i))
+            axe[i].axis('off')
+            axe[i].set_aspect(aspect=1)
+
+            # cv2.imshow('Before: ', im)
+            # cv2.imshow('After kernel {}: '.format(i), smooth.avg_filter(im, i, weighted))
+        manager = plot.get_current_fig_manager()
+        manager.full_screen_toggle()
+        # manager.resize(*manager.window.maxsize())
+        plot.show()
+    return
+
+
+def display_gauss_filter(ims: List[np.ndarray]):
+    for im in ims:
+        f, axe = plot.subplots(1, 4, squeeze=True)
+        f.set_tight_layout(True)
+        f.suptitle('gaussian filter', fontsize=16)
+        axe[0].imshow(im, cmap='gray')
+        axe[0].set_title('Before: ')
+        axe[0].axis('off')
+        for i in range(1, 4):
+            axe[i].imshow(smooth.guass_filter(im, i), cmap='gray')
+            axe[i].set_title('After kernel {}: '.format(i))
+            axe[i].axis('off')
+            axe[i].set_aspect(aspect=1)
+
+        manager = plot.get_current_fig_manager()
+        manager.full_screen_toggle()
+        # manager.resize(*manager.window.maxsize())
+        plot.show()
+    return
+
+
+def display_lpl_filter(ims: List[np.ndarray]):
+    for im in ims:
+        f, axe = plot.subplots(1, 4, squeeze=True)
+        f.set_tight_layout(True)
+        f.suptitle('laplacian sharpening', fontsize=16)
+        axe[0].imshow(im, cmap='gray')
+        axe[0].set_title('Before: ')
+        axe[0].axis('off')
+        axe[0].set_aspect(aspect=1)
+
+        final, lpl = sharpen.lpl_sharpen(im, masks.LPL2_3X3)
+        axe[1].imshow(lpl, cmap='gray')
+        axe[1].set_title('laplacian filter')
+        axe[1].axis('off')
+        axe[1].set_aspect(aspect=1)
+
+        axe[2].imshow(final, cmap='gray')
+        axe[2].set_title('sharpened image')
+        axe[2].axis('off')
+        axe[2].set_aspect(aspect=1)
+
+        p2, p98 = np.percentile(final, (1, 99))
+        img_rescale = exposure.rescale_intensity(final, in_range=(p2, p98))
+
+        axe[3].imshow(img_rescale, cmap='gray')
+        axe[3].set_title('after contrast stretch')
+        axe[3].axis('off')
+        axe[3].set_aspect(aspect=1)
+
+        manager = plot.get_current_fig_manager()
+        manager.full_screen_toggle()
+        plot.show()
+    return
 
 
 # improved gaussian pyramid display function
@@ -63,7 +192,10 @@ def display_guass_pyramid(samples: List[np.ndarray]):
     for i in range(0, len):
         plot.figimage(transform.resize(samples[i], (square_size, square_size), anti_aliasing=False),
                       i * square_size + (i + 1) * padding, im_og_dim[1] + gap - padding, cmap='gray')
-
+    # make figure fullscreen
+    manager = plot.get_current_fig_manager()
+    manager.full_screen_toggle()
+    plot.suptitle('pyramid', fontsize=16)
     plot.show()  # display figure
     return
 

@@ -7,13 +7,10 @@ STD_7X7 = np.ones((7, 7), dtype='int'), 3
 # weighted standard filter
 WTD1_3X3 = [0, 1, 0, 1, 2, 1, 0, 1, 0]
 WTD1_3X3 = np.array(WTD1_3X3).reshape((3, 3))
-WTD1_3X3 = (WTD1_3X3, 1)
-# WTD1_3X3_2 = WTD1_3X3, 1
 
 # weighted standard filter ver. 2
 WTD2_3X3 = [1, 2, 1, 2, 4, 2, 1, 2, 1]
 WTD2_3X3 = np.array(WTD2_3X3).reshape((3, 3))
-WTD2_3X3 = (WTD2_3X3, 1)
 
 
 

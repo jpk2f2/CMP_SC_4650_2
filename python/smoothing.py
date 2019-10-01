@@ -1,8 +1,8 @@
-import cv2
 import numpy as np
 import math
 import scipy.signal
 import masks
+from multiprocessing import Process, Manager
 from utility import prepare_image, pp_image, create_gauss_conv
 
 
@@ -12,15 +12,13 @@ from utility import prepare_image, pp_image, create_gauss_conv
 # if no mask is specified and box filter isn't specified it defaults to a 3x3 box filter
 # available mask/kernel tuples can be found in masks.py, or custom can be used following in their pattern
 # returns processed image
-def avg_filter(im: np.ndarray, mask: tuple = (masks.STD_3X3, 1), box: tuple = (False, 0)) -> np.ndarray:
-    # check if box filter requested
-    if box[0]:
-        # create box filter in designated kernel size
-        _filter = np.ones((box[1], box[1]), dtype='int')
-        kernel = box[1]
+def avg_filter(im: np.ndarray, kernel: int = 1, weighted: bool = False, w_alt: bool = True):
+    if weighted:
+        if kernel != 1:
+            return
+        _filter = masks.WTD1_3X3 if w_alt else masks.WTD2_3X3
     else:
-        # use given filter and kernel
-        _filter, kernel = mask
+        _filter = np.ones((2*kernel+1, 2*kernel+1), dtype='int')
 
     im, im_proc = prepare_image(im, kernel, 'zero')  # preprocess image
     # loop through filter to get divisor
@@ -52,14 +50,39 @@ def med_filter(im: np.ndarray, kernel: int) -> np.ndarray:
         for j in range(0 + kernel, dimensions[1] - (2 * kernel)):
             for k in range(-kernel, kernel + 1):
                 for l in range(-kernel, kernel + 1):
-                    window.append(im[i + k, k + l])
+                    window.append(im[i + k, j + l])
             # sort pixels from sliding window and then place median value in processed image
             window.sort()
             im_proc[i, j] = window[math.floor(((kernel * 2 + 1) ** 2) / 2)]
-
             window.clear()  # clear sliding window list for next iteration
     # return processed image
     return pp_image(im_proc, False)
+
+
+"""
+def med_filter_2(im: np.ndarray, kernel: int) -> np.ndarray:
+    im, im_proc = prepare_image(im, kernel, 'zero')  # preprocess image
+    dimensions = im.shape
+    # loop through image pixels, excluding padded edges
+    # place pixels within sliding window in list
+    window = []
+    # b = np.zeros()
+    for i in range(0 + kernel, dimensions[0] - (2 * kernel)):
+        for j in range(0 + kernel, dimensions[1] - (2 * kernel)):
+            a = []
+            for k in range(-kernel, kernel + 1):
+                for l in range(-kernel, kernel + 1):
+                    # a[k+kernel, l+kernel] = [i+k, j+l]
+                    a.append([i+k, j+l])
+            print(kernel)
+            print(a.__len__())
+            print(a)
+            print(np.take(im, a))
+            #im_proc[i, j] = np.median(b)
+            # sort pixels from sliding window and then place median value in processed image
+    # return processed image
+    return pp_image(im_proc, False)
+"""
 
 
 # generic guassian filter algorithm

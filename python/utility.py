@@ -24,7 +24,7 @@ def prepare_image(im: np.ndarray, padding: int, pad_type: str):
     else:
         print('This should not have been reached')
 
-    return im, im2  # return processed image
+    return im.astype(dtype='float64'), im2.astype(dtype='float64')  # return processed image
 
 
 # post processes given image
