@@ -7,13 +7,14 @@ STD_7X7 = np.ones((7, 7), dtype='int'), 3
 # weighted standard filter
 WTD1_3X3 = [0, 1, 0, 1, 2, 1, 0, 1, 0]
 WTD1_3X3 = np.array(WTD1_3X3).reshape((3, 3))
-WTD1_3X3 = (WTD1_3X3, 1)
-# WTD1_3X3_2 = WTD1_3X3, 1
 
 # weighted standard filter ver. 2
 WTD2_3X3 = [1, 2, 1, 2, 4, 2, 1, 2, 1]
 WTD2_3X3 = np.array(WTD2_3X3).reshape((3, 3))
-WTD2_3X3 = (WTD2_3X3, 1)
+
+
+
+# Laplacian filters with their kernel sizes
 
 # Laplacian filter 1 and its alt
 LPL1_3X3 = [0, -1, 0, -1, 4, -1, 0, -1, 0]
@@ -58,3 +59,12 @@ GAUS_7X7 = [[0.01129725, 0.01491455, 0.01761946, 0.01862602, 0.01761946, 0.01491
 GAUS_7X7 = np.array(GAUS_7X7).reshape((7, 7))
 # add additional kernel sizes up to 6(6 is max necessary) here
 # for now will simply calculate them during runtime if needed
+
+def kernel_to_filter(arg):
+    switcher = {
+        1: GAUS_3X3,
+        2: GAUS_5X5,
+        3: GAUS_7X7,
+    }
+
+    return switcher.get(arg, None)
