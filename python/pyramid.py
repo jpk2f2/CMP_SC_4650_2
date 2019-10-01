@@ -46,5 +46,3 @@ def get_gaussian_pyramid(im: np.ndarray, levels: int) -> List[np.ndarray]:
     x.append(guass_pyramid_resize(x[-1]))
     return x
 
-
-
