@@ -6,6 +6,7 @@ import matplotlib
 import display
 import pyramid
 
+# use TkAgg backend to display in window instead of pycharm scientific mode
 matplotlib.use('TkAgg')
 
 # read in part 1 images
@@ -19,14 +20,18 @@ fig_340 = cv2.imread('resources/Fig0340(a)(dipxe_text).tif', 0)
 # read in part 3 images
 lenna = cv2.imread('resources/Lenna.png', 0)
 
-
+# displays for inclass presenting
+# display median filter at different kernel sizes for all four images
+# note that this runs quite slow, especially in comparison to the rest
 display.display_med_filter([fig_312, fig_333, fig_334, fig_335])
+# display average(box) filter at different kernel sizes for all four images
 display.display_avg_filter([fig_312, fig_333, fig_334, fig_335])
+# display average(weighted) filter at different kernel sizes for all four images
 display.display_avg_filter([fig_312, fig_333, fig_334, fig_335], True)
+# display gaussian filter at different kernel sizes for all four images
 display.display_gauss_filter([fig_312, fig_333, fig_334, fig_335])
+# display sharpening filter for both images
 display.display_lpl_filter([fig_338, fig_340])
+# display gaussian pyramid for 'lenna' image
 tmp = pyramid.get_gaussian_pyramid(lenna, 7)
 display.display_guass_pyramid(tmp)
-
-
-#  print(smooth.create_gauss_conv(3))

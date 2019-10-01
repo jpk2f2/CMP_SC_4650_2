@@ -13,22 +13,9 @@ import sharpening as sharpen
 matplotlib.use('TkAgg')  # print figures to window instead of pycharm scientific mode
 
 """
-Display functions for all the first two parts of the assignment
-To be filled in later
-
-def display_avg_filter(im: np.ndarray, weighted: bool):
-
-def display_med_filter(im: np.ndarray):
-
-def display_gauss_filter(im: np.ndarray, premade: bool):
-
-def display_lpl_sharpen(im: np.ndarray):
-
 # this algorithm does not exist yet
 # may never be used
 def display_unsharp(im: np.ndarray):
-
-
 """
 
 
@@ -74,7 +61,6 @@ def display_avg_filter(ims: List[np.ndarray], weighted: bool = False):
             # cv2.imshow('After kernel {}: '.format(i), smooth.avg_filter(im, i, weighted))
         manager = plot.get_current_fig_manager()
         manager.full_screen_toggle()
-        # manager.resize(*manager.window.maxsize())
         plot.show()
     return
 
@@ -95,7 +81,6 @@ def display_gauss_filter(ims: List[np.ndarray]):
 
         manager = plot.get_current_fig_manager()
         manager.full_screen_toggle()
-        # manager.resize(*manager.window.maxsize())
         plot.show()
     return
 
