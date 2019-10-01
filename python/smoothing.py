@@ -51,9 +51,9 @@ def med_filter(im: np.ndarray, kernel: int) -> np.ndarray:
             for k in range(-kernel, kernel + 1):
                 for l in range(-kernel, kernel + 1):
                     window.append(im[i + k, j + l])
-            # sort pixels from sliding window and then place median value in processed image
+            # sort pixels from sliding window and thenq place median value in processed image
             window.sort()
-            im_proc[i, j] = window[math.ceil(((kernel * 2 + 1) ** 2) / 2)]
+            im_proc[i, j] = window[math.floor(((kernel * 2 + 1) ** 2) / 2)]
             window.clear()  # clear sliding window list for next iteration
     # return processed image
     return pp_image(im_proc, False)
